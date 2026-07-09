@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6284421178701453951}
   m_Layer: 0
   m_Name: Liquid 2
-  m_TagString: Untagged
+  m_TagString: Ingredient
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -155,5 +155,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fabf49f7ed95bb44a776a475f821342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ingredient
-  ingredientName: 
+  ingredientName: 'Blue liquid '
   spawnPosition: {fileID: 0}

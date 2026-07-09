@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Coca
   - Extasis
+  - Ingredient
   layers:
   - Default
   - TransparentFX

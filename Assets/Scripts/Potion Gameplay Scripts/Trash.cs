@@ -3,22 +3,17 @@ using UnityEngine;
 public class Trash : MonoBehaviour
 {
     private Ingredient ingredient;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        ingredient = GameObject.Find("Ingredient").GetComponent<Ingredient>();
-    }
-
-
     private void OnTriggerEnter(Collider other)
     {
+        ingredient = other.GetComponent<Ingredient>();
+        Debug.Log("Detect the trigger");
 
-        if (ingredient != null && other.transform.parent == null)
+        if (ingredient != null)
         {
-            Debug.Log($"Ingrediente {ingredient.ingredientName} enviado a la basura.");
-            AudioManager.Instance.PlaySFXTrash(); // Sonido de basura
-            ingredient.ConsumedIngredient(); // Desaparece y spawnea otro en su base
+            Debug.Log($"Ingredient {ingredient.ingredientName} drop to the trash.");
+            AudioManager.Instance.PlaySFXTrash(); 
+            ingredient.transform.SetParent(null);
+            ingredient.ConsumedIngredient();
         } 
     }
 }

@@ -14,15 +14,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform grabbedObjectPosition;
     private float horizontalRotation = 0f;
     private float verticalRotation = 0f;
-
     private GameObject grabbedObject = null;
 
+    private CharacterController characterController;
     private InputSystem_Actions controls;
 
 
     void Awake()
     {
         controls =  new InputSystem_Actions();
+        characterController = GetComponent<CharacterController>();
     }
     void OnEnable()
     {
@@ -53,8 +54,9 @@ public class PlayerMovement : MonoBehaviour
     void HandlePlayerMovement()
     {
         Vector2 moveInput = controls.Player.Move.ReadValue<Vector2>();
-        Vector3 move = new Vector3(moveInput.x, 0f, moveInput.y);
-        transform.Translate(move * moveSpeed * Time.fixedDeltaTime, Space.Self);
+        Vector3 moveDirection = moveInput.x * transform.right + moveInput.y * transform.forward;
+
+        characterController.Move(moveDirection * moveSpeed * Time.fixedDeltaTime);
     }
 
     void HandleCameraLookMovement()
@@ -80,10 +82,10 @@ public class PlayerMovement : MonoBehaviour
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
                 DropObject();
-                return;
             }
-            
+            return;
         }
+
 
         Ray ray = new Ray(playerCamera.position, playerCamera.forward);
         RaycastHit hit;
@@ -128,8 +130,10 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.isKinematic = false;
             rb.useGravity = true;
+            rb.WakeUp();
         }
         Debug.Log("Dropped object");
+        grabbedObject = null;
     }
 
     void OnDrawGizmos()
