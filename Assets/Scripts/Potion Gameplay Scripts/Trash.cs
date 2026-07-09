@@ -3,10 +3,10 @@ using UnityEngine;
 public class Trash : MonoBehaviour
 {
     private Ingredient ingredient;
-    private void OnTriggerEnter(Collider other)
+
+    void OnCollisionEnter(Collision collision)
     {
-        ingredient = other.GetComponent<Ingredient>();
-        Debug.Log("Detect the trigger");
+        ingredient = collision.gameObject.GetComponent<Ingredient>();
 
         if (ingredient != null)
         {
@@ -14,6 +14,6 @@ public class Trash : MonoBehaviour
             AudioManager.Instance.PlaySFXTrash(); 
             ingredient.transform.SetParent(null);
             ingredient.ConsumedIngredient();
-        } 
+        }
     }
 }

@@ -21,7 +21,15 @@ public class Ingredient : MonoBehaviour
     
     public void ConsumedIngredient()
     {
-        ingredientSpawner.ReportIngredientDestroyed(spawnPosition);
+        if (ingredientSpawner != null)
+        {
+            ingredientSpawner.ReportIngredientDestroyed(spawnPosition);
+        }
+        else
+        {
+            Debug.LogWarning($"{ingredientName}: ingredientSpawner es null, no se puede reportar destrucción.");
+        }
+
         Destroy(gameObject);
     }
 }
