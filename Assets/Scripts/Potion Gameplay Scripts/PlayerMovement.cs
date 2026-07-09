@@ -10,10 +10,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform playerCamera;
 
     [SerializeField] private float interactionDistance = 3f;
-    [SerializeField] private Transform holdPosition;
+    [SerializeField] private Transform grabbedObjectPosition;
+
     
     private float horizontalRotation = 0f;
     private float verticalRotation = 0f;
+
+    private GameObject grabbedObject = null;
 
     private InputSystem_Actions controls;
 
@@ -71,20 +74,58 @@ public class PlayerMovement : MonoBehaviour
 
     void HandlePlayerInteraction()
     {
-        // Lanzar rayo desde el centro exacto de la cámara hacia adelante
+        if (grabbedObject != null)
+        {
+            if (controls.Player.Interact.WasPressedThisFrame())
+            {
+                grabbedObject.transform.SetParent(null);
+
+                Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.isKinematic = false;
+                    rb.useGravity = true;
+                }
+                return;
+            }
+            
+        }
+
         Ray ray = new Ray(playerCamera.position, playerCamera.forward);
         RaycastHit hit;
-
-        // Dibujar el rayo en la vista de escena para debuggear de forma visual
-        Debug.DrawRay(playerCamera.position, playerCamera.forward * interactionDistance, Color.cyan);
 
         if (Physics.Raycast(ray, out hit, interactionDistance))
         {
             Debug.Log("Hit object: " + hit.collider.gameObject.name);
+            Ingredient ingredient = hit.collider.GetComponent<Ingredient>();
+
+            if (ingredient != null)
+            {
+                // Handle ingredient interaction
+                Debug.Log($"Interacting with ingredient: {ingredient.ingredientName}");
+                if (controls.Player.Interact.WasPressedThisFrame())
+                {
+                    grabbedObject = hit.collider.gameObject;
+                    Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        rb.isKinematic = true;
+                        rb.useGravity = false;
+                    }
+                    grabbedObject.transform.position = grabbedObjectPosition.position;
+                    grabbedObject.transform.rotation = grabbedObjectPosition.rotation;
+
+                    grabbedObject.transform.SetParent(grabbedObjectPosition);
+                }
+            }
         }
     }
 
-   
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawRay(playerCamera.position, playerCamera.forward * interactionDistance);
+    }
 
     void OnDisable()
     {
