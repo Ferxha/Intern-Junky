@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,14 +6,12 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
 
-    [SerializeField] private float cameraLookSensitivity = 2f;
-    [SerializeField] private float sideLookLimit = 90f;
+    public float cameraLookSensitivity = 100f;
+    [SerializeField] private float lookLimit = 90f;
     [SerializeField] private Transform playerCamera;
 
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private Transform grabbedObjectPosition;
-
-    
     private float horizontalRotation = 0f;
     private float verticalRotation = 0f;
 
@@ -30,7 +29,6 @@ public class PlayerMovement : MonoBehaviour
         controls.Enable();
         Debug.Log(controls.Player.Move);
         Debug.Log(controls.Player.Look);
-        Debug.Log(controls.Player.Interact);
     }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -63,29 +61,25 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 lookInput = controls.Player.Look.ReadValue<Vector2>();
         
-        horizontalRotation = lookInput.x * cameraLookSensitivity;
+        float mouseX = lookInput.x * cameraLookSensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * cameraLookSensitivity * Time.deltaTime;
+
+        horizontalRotation = mouseX;
         transform.Rotate(Vector3.up * horizontalRotation);
 
-        verticalRotation -= lookInput.y * cameraLookSensitivity;
-        verticalRotation = Mathf.Clamp(verticalRotation, -sideLookLimit, sideLookLimit); //Limit how far the player can look up and down
-        
+        verticalRotation -= mouseY;
+        verticalRotation = Mathf.Clamp(verticalRotation, -lookLimit, lookLimit);
         playerCamera.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
+
     }
 
     void HandlePlayerInteraction()
     {
         if (grabbedObject != null)
         {
-            if (controls.Player.Interact.WasPressedThisFrame())
+            if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                grabbedObject.transform.SetParent(null);
-
-                Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.isKinematic = false;
-                    rb.useGravity = true;
-                }
+                DropObject();
                 return;
             }
             
@@ -103,28 +97,47 @@ public class PlayerMovement : MonoBehaviour
             {
                 // Handle ingredient interaction
                 Debug.Log($"Interacting with ingredient: {ingredient.ingredientName}");
-                if (controls.Player.Interact.WasPressedThisFrame())
+                if (Mouse.current.leftButton.wasPressedThisFrame)
                 {
                     grabbedObject = hit.collider.gameObject;
-                    Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        rb.isKinematic = true;
-                        rb.useGravity = false;
-                    }
-                    grabbedObject.transform.position = grabbedObjectPosition.position;
-                    grabbedObject.transform.rotation = grabbedObjectPosition.rotation;
-
-                    grabbedObject.transform.SetParent(grabbedObjectPosition);
+                    GrabObject();
                 }
             }
         }
+    }
+
+    void GrabObject()
+    {
+        Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+        grabbedObject.transform.position = grabbedObjectPosition.position;
+        grabbedObject.transform.rotation = grabbedObjectPosition.rotation;
+
+        grabbedObject.transform.SetParent(grabbedObjectPosition);
+    }
+
+    void DropObject()
+    {
+        grabbedObject.transform.SetParent(null);
+        Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+        }
+        Debug.Log("Dropped object");
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(playerCamera.position, playerCamera.forward * interactionDistance);
+        Gizmos.color = Color.darkBlue;
+        Gizmos.DrawWireSphere(grabbedObjectPosition.position, 1f);
     }
 
     void OnDisable()

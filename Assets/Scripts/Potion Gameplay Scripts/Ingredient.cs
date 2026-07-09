@@ -21,7 +21,6 @@ public class Ingredient : MonoBehaviour
     
     public void ConsumedIngredient()
     {
-        // Le dice al manager que su punto quedó libre para que spawnee otro
         ingredientSpawner.ReportIngredientDestroyed(spawnPosition);
         Destroy(gameObject);
     }
