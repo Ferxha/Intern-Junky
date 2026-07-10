@@ -57,6 +57,11 @@ public class GameManager : MonoBehaviour
 
     public void StartGame(int difficulty)
     {
+        if (isGameActive)
+        {
+            return;
+        }
+
         CancelInvoke();
         Time.timeScale = 1f;
         orderCount += difficulty;
