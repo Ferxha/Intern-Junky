@@ -37,6 +37,15 @@ public class PlayerMovement : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = true;
+
+        horizontalRotation = 0f;
+        verticalRotation = 0f;
+
+        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
+        if (playerCamera != null)
+        {
+            playerCamera.localRotation = Quaternion.identity; // Esto es equivalente a (0, 0, 0)
+        }
     }
 
     // Update is called once per frame

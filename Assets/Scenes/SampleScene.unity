@@ -408,7 +408,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.65
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -951,7 +951,7 @@ Transform:
   m_GameObject: {fileID: 573920902}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.81, z: -8.54}
+  m_LocalPosition: {x: 0, y: 1.81, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -971,10 +971,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 25
-  cameraLookSensitivity: 5
+  cameraLookSensitivity: 6
   lookLimit: 90
   playerCamera: {fileID: 330585546}
-  interactionDistance: 5
+  interactionDistance: 7
   grabbedObjectPosition: {fileID: 2052270846}
 --- !u!143 &573920905
 CharacterController:
