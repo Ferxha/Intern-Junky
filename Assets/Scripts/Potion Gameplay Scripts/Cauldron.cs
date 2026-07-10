@@ -1,42 +1,54 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 public class Cauldron : MonoBehaviour
 {
-    //Script del caldero: Valida que ingredientes han entrado al caldero y compara con la orden del momento 
+    // Valida los ingredientes que entran al caldero y los compara con la orden actual.
     [SerializeField] private GameObject cauldronSmokeFXPrefab;
     [SerializeField] private RecipeSystem recipeSystem;
     [SerializeField] private List<string> ingredientsInside = new List<string>();
+    [SerializeField] private int ordersTotal;
+
     private RecipeSystem.PotionOrder currentOrder;
     private IngredientSpawner ingredientSpawner;
-    //AQUI SE AGREGARIA LA LOGICA DE LA DIFICULTAD DE NIVEL Y QUE CUMPLA CON X CANTIDAD DE PEDIDOS ANTES DE QUE EL TIEMPO ACABE
-    //O EN UN GAME MANAGER MANDAR A LLAMAR SOLO LA VARIABLE DE orderCount
-    [SerializeField] private int ordersTotal; //Afectado por la dificultad, está variable se va a localizar donde se asigne el método donde compare contidad de órdenes con las pendientes y el tiempo
-    private int orderCount = 0;
+    private Ingredient ingredient;
 
     void Start()
     {
-        ingredientSpawner = GameObject.Find("Ingredient Spawner").GetComponent<IngredientSpawner>();
-
-        if (recipeSystem == null) 
+        GameObject ingredientSpawnerObject = GameObject.Find("Ingredient Spawner");
+        if (ingredientSpawnerObject != null)
         {
-            recipeSystem = GetComponent<RecipeSystem>();
+            ingredientSpawner = ingredientSpawnerObject.GetComponent<IngredientSpawner>();
         }
-        
+
+        if (recipeSystem == null)
+        {
+            recipeSystem = FindFirstObjectByType<RecipeSystem>();
+        }
+
+        if (recipeSystem == null)
+        {
+            Debug.LogError("RecipeSystem no encontrado para Cauldron.");
+            enabled = false;
+            return;
+        }
+
         RequestNewOrder();
     }
 
-    //Solicita nueva orden
     void RequestNewOrder()
     {
         currentOrder = recipeSystem.GenerateRandomOrder();
         Debug.Log($"[NEW ORDER]: {currentOrder.potionName}");
         Debug.Log($"Required ingredients: {string.Join(", ", currentOrder.requiredIngredients)}");
-    }
-    private Ingredient ingredient;
 
-    //Cuando un objeto colisiona con el caldero actualiza la lista y desaparece
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetCurrentOrder(currentOrder.potionName);
+            GameManager.Instance.PresentCurrentOrder();
+        }
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         ingredient = collision.gameObject.GetComponent<Ingredient>();
@@ -44,13 +56,21 @@ public class Cauldron : MonoBehaviour
         if (ingredient != null)
         {
             ingredientsInside.Add(ingredient.ingredientName);
-            
-            AudioManager.Instance.PlaySFXCauldron(); 
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFXCauldron();
+            }
+
             if (cauldronSmokeFXPrefab != null)
             {
-                // Spawnear el humo justo donde chocó el ingrediente
-                Instantiate(cauldronSmokeFXPrefab, collision.contacts[0].point, cauldronSmokeFXPrefab.transform.rotation);
+                Vector3 spawnPosition = collision.contactCount > 0
+                    ? collision.GetContact(0).point
+                    : collision.transform.position;
+
+                Instantiate(cauldronSmokeFXPrefab, spawnPosition, cauldronSmokeFXPrefab.transform.rotation);
             }
+
             ingredient.transform.SetParent(null);
             ingredient.ConsumedIngredient();
 
@@ -61,7 +81,6 @@ public class Cauldron : MonoBehaviour
         }
     }
 
-    //Método para evaluar si los ingredientes son los de la orden, indica éxito o fracaso
     void EvaluatePotion()
     {
         bool hasSameIngredients = recipeSystem.AreSameIngredients(ingredientsInside, currentOrder.requiredIngredients);
@@ -69,16 +88,41 @@ public class Cauldron : MonoBehaviour
         if (hasSameIngredients == true)
         {
             Debug.Log("Success!");
-            AudioManager.Instance.PlaySFXPotionSuccess();
-            orderCount++;
-        } else
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFXPotionSuccess();
+            }
+
+            if (GameManager.Instance != null && !GameManager.Instance.CompleteCurrentOrder())
+            {
+                ingredientsInside.Clear();
+                return;
+            }
+        }
+        else
         {
             Debug.Log("Failure.");
-            AudioManager.Instance.PlaySFXPotionFailure();
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFXPotionFailure();
+            }
+
+            ingredientsInside.Clear();
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.GameOverWrongRecipe();
+            }
+
+            return;
         }
 
         ingredientsInside.Clear();
+        if (ingredientSpawner != null)
+        {
+            ingredientSpawner.RespawnEverythingInNewPositions();
+        }
+
         RequestNewOrder();
-        ingredientSpawner.RespawnEverythingInNewPositions();
     }
 }

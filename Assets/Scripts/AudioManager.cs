@@ -39,12 +39,13 @@ public class AudioManager : MonoBehaviour
 
     void PlayBackgroundMusic(AudioClip clip)
     {
-        if (clip == null && musicSource != null) return; //CAMBIAR CUANDO SE TENGA PISTA DE AUDIO
-        {
-            musicSource.clip = clip;
-            musicSource.loop = true;
-            musicSource.Play();
-        }
+        if (clip == null || musicSource == null) return; //CAMBIAR CUANDO SE TENGA PISTA DE AUDIO
+
+        if (musicSource.clip == clip && musicSource.isPlaying) return;
+
+        musicSource.clip = clip;
+        musicSource.loop = true;
+        musicSource.Play();
     }
 
     //Creo métodos públicos para reproducir los efectos de sonido desde otros scripts

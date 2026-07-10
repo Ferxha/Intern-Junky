@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class SubstanceObject : MonoBehaviour
 {
-    public SubstanceType substanceType;
-    public SubstanceManager substanceManager;
+    [SerializeField] private SubstanceType substanceType;
+    [SerializeField] private SubstanceManager substanceManager;
     
     void Awake()
     {
@@ -13,18 +13,53 @@ public class SubstanceObject : MonoBehaviour
 
     void Update()
     {
-        if (substanceManager == null) return;
-        
+        RefreshVisibility();
+    }
+
+    public void RefreshVisibility()
+    {
+        if (substanceManager == null)
+        {
+            substanceManager = SubstanceManager.Instance != null
+                ? SubstanceManager.Instance
+                : FindFirstObjectByType<SubstanceManager>();
+        }
+
+        if (substanceManager == null)
+        {
+            return;
+        }
+
         int inventory = substanceType switch
         {
             SubstanceType.Coca => substanceManager.GetCocaAmount(),
             SubstanceType.Extasis => substanceManager.GetExtasisAmount(),
             _ => 0
         };
-        
-        if (inventory <= 0)
+
+        gameObject.SetActive(inventory > 0);
+    }
+
+    public bool TryConsume()
+    {
+        if (substanceManager == null)
         {
-            gameObject.SetActive(false);
+            substanceManager = SubstanceManager.Instance != null
+                ? SubstanceManager.Instance
+                : FindFirstObjectByType<SubstanceManager>();
         }
+
+        if (substanceManager == null)
+        {
+            Debug.LogWarning($"{name}: SubstanceManager no encontrado.");
+            return false;
+        }
+
+        return substanceType switch
+        {
+            SubstanceType.Coca => substanceManager.ConsumeCoca(),
+            SubstanceType.Extasis => substanceManager.ConsumeExtasis(),
+            _ => false
+        };
     }
 }

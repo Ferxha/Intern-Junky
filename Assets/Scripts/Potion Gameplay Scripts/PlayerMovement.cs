@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,43 +5,48 @@ public class PlayerMovement : MonoBehaviour
 {
     //Script movimiento y acciones del jugador
     [SerializeField] private float moveSpeed = 5f;
-
-    public float cameraLookSensitivity = 100f;
-    private float horizontalRotation = 0f;
-    private float verticalRotation = 0f;
+    [SerializeField] private float cameraLookSensitivity = 100f;
     [SerializeField] private float lookLimit = 90f;
     [SerializeField] private Transform playerCamera;
-
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private Transform grabbedObjectPosition;
+    [SerializeField] private float inputSmoothSpeed = 10f;
 
+    private float verticalRotation = 0f;
     private GameObject grabbedObject = null;
-
     private CharacterController characterController;
     private InputSystem_Actions controls;
-
+    private SubstanceManager substanceManager;
+    private Vector2 smoothedMoveInput;
+    private bool wasGameActive;
+    private bool cursorStateInitialized;
 
     void Awake()
     {
-        controls =  new InputSystem_Actions();
+        controls = new InputSystem_Actions();
         characterController = GetComponent<CharacterController>();
+        substanceManager = FindFirstObjectByType<SubstanceManager>();
     }
+
     void OnEnable()
     {
         controls.Enable();
-        Debug.Log(controls.Player.Move);
-        Debug.Log(controls.Player.Look);
     }
-    
     
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = true;
+        UpdateCursorState();
     }
 
     void Update()
     {
+        if (!ShouldHandleGameplay())
+        {
+            UpdateCursorState();
+            return;
+        }
+
+        UpdateCursorState();
         HandleCameraLookMovement();
         HandlePlayerInteraction();
     }
@@ -50,6 +54,11 @@ public class PlayerMovement : MonoBehaviour
     //Se mueve movimiento a Fixed Update para mayor precisión
     void FixedUpdate()
     {
+        if (!ShouldHandleGameplay())
+        {
+            return;
+        }
+
         HandlePlayerMovement();
     }
 
@@ -57,9 +66,19 @@ public class PlayerMovement : MonoBehaviour
     void HandlePlayerMovement()
     {
         Vector2 moveInput = controls.Player.Move.ReadValue<Vector2>();
-        Vector3 moveDirection = moveInput.x * transform.right + moveInput.y * transform.forward;
 
-        characterController.Move(moveDirection * moveSpeed * Time.fixedDeltaTime);
+        if (substanceManager != null && substanceManager.GetCurrentSubstance() == SubstanceType.Extasis)
+        {
+            smoothedMoveInput = Vector2.Lerp(smoothedMoveInput, moveInput, inputSmoothSpeed * 0.3f * Time.fixedDeltaTime);
+        }
+        else
+        {
+            smoothedMoveInput = Vector2.Lerp(smoothedMoveInput, moveInput, inputSmoothSpeed * Time.fixedDeltaTime);
+        }
+
+        Vector3 moveDirection = smoothedMoveInput.x * transform.right + smoothedMoveInput.y * transform.forward;
+
+        characterController.Move(moveDirection * GetCurrentMoveSpeed() * Time.fixedDeltaTime);
     }
 
     //Método encargado del movimiento de la cámara
@@ -70,8 +89,7 @@ public class PlayerMovement : MonoBehaviour
         float mouseX = lookInput.x * cameraLookSensitivity * Time.deltaTime;
         float mouseY = lookInput.y * cameraLookSensitivity * Time.deltaTime;
 
-        horizontalRotation = mouseX;
-        transform.Rotate(Vector3.up * horizontalRotation);
+        transform.Rotate(Vector3.up * mouseX);
 
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -lookLimit, lookLimit);
@@ -84,7 +102,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (grabbedObject != null)
         {
-            if (Mouse.current.leftButton.wasPressedThisFrame)
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             {
                 DropObject();
             }
@@ -98,13 +116,24 @@ public class PlayerMovement : MonoBehaviour
         if (Physics.Raycast(ray, out hit, interactionDistance))
         {
             Debug.Log("Hit object: " + hit.collider.gameObject.name);
+
+            SubstanceObject substanceObject = hit.collider.GetComponent<SubstanceObject>();
+            if (substanceObject != null)
+            {
+                if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+                {
+                    substanceObject.TryConsume();
+                }
+                return;
+            }
+
             Ingredient ingredient = hit.collider.GetComponent<Ingredient>();
 
             if (ingredient != null)
             {
                 // Handle ingredient interaction
                 Debug.Log($"Interacting with ingredient: {ingredient.ingredientName}");
-                if (Mouse.current.leftButton.wasPressedThisFrame)
+                if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
                 {
                     grabbedObject = hit.collider.gameObject;
                     GrabObject();
@@ -157,4 +186,50 @@ public class PlayerMovement : MonoBehaviour
         controls.Disable();
     }
 
+    private bool ShouldHandleGameplay()
+    {
+        if (GameManager.Instance == null)
+        {
+            return true;
+        }
+
+        return GameManager.Instance.IsGameplayInputEnabled;
+    }
+
+    private float GetCurrentMoveSpeed()
+    {
+        if (substanceManager == null)
+        {
+            substanceManager = SubstanceManager.Instance != null
+                ? SubstanceManager.Instance
+                : FindFirstObjectByType<SubstanceManager>();
+        }
+
+        if (substanceManager == null)
+        {
+            return moveSpeed;
+        }
+
+        return substanceManager.GetCurrentSubstance() switch
+        {
+            SubstanceType.Coca => moveSpeed * substanceManager.GetCocaSpeedMultiplier(),
+            SubstanceType.Extasis => moveSpeed * substanceManager.GetExtasisSpeedMultiplier(),
+            _ => moveSpeed
+        };
+    }
+
+    private void UpdateCursorState()
+    {
+        bool isGameActive = ShouldHandleGameplay();
+
+        if (cursorStateInitialized && wasGameActive == isGameActive)
+        {
+            return;
+        }
+
+        cursorStateInitialized = true;
+        wasGameActive = isGameActive;
+        Cursor.lockState = isGameActive ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !isGameActive;
+    }
 }

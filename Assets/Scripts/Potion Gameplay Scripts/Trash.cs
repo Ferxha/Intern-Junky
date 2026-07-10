@@ -17,7 +17,19 @@ public class Trash : MonoBehaviour
             AudioManager.Instance.PlaySFXTrash(); 
             if (trashSmokeFXPrefab != null)
             {
-                Instantiate(trashSmokeFXPrefab, transform.position, trashSmokeFXPrefab.transform.rotation);
+                Vector3 spawnPosition = collision.contactCount > 0
+                    ? collision.GetContact(0).point
+                    : collision.transform.position;
+
+                GameObject smokeFX = Instantiate(
+                    trashSmokeFXPrefab,
+                    spawnPosition,
+                    trashSmokeFXPrefab.transform.rotation);
+
+                foreach (ParticleSystem particleSystem in smokeFX.GetComponentsInChildren<ParticleSystem>())
+                {
+                    particleSystem.Play(true);
+                }
             }
 
             ingredient.transform.SetParent(null);

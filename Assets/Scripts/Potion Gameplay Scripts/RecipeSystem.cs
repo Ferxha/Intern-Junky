@@ -39,27 +39,27 @@ public class RecipeSystem : MonoBehaviour
     //Método para crear el nombre de la poción con base en la orden generada
     public string BuildPotionName(string liquid, string solid1, string solid2)
     {
-        string generatedName = (liquid == "Green Liquid") ? "Tonic" : "Potion";
+        string generatedName = (liquid.Trim() == "Green Liquid") ? "Tonico" : "Pocion";
 
         string adjective1 = GetIngredientAdjective(solid1,1);
-        string adjective2 = GetIngredientAdjective(solid1,2);;
+        string adjective2 = GetIngredientAdjective(solid2,2);
 
-        return $"{adjective1} {adjective2} {generatedName}";
+        return $"{generatedName} {adjective1} {adjective2}";
     }
 
     //Método para obtener el adjetivo según la posición del ingrediente sólido
     private string GetIngredientAdjective(string ingredientName, int propertyIndex)
     {
-        switch (ingredientName)
+        switch (ingredientName.Trim())
         {
             case "Hawk Feather":
-                return (propertyIndex == 1) ? "Bitter" : "Dry";
+                return (propertyIndex == 1) ? "Amargo" : "Seco";
             case "Goat's Eye":
-                return (propertyIndex == 1) ? "Sweet" : "Gooey";
+                return (propertyIndex == 1) ? "Dulce" : "Viscoso";
             case "Dragon's Scale":
-                return (propertyIndex == 1) ? "Salty" : "Crunchy";
+                return (propertyIndex == 1) ? "Salado" : "Crocante";
             default:
-                return "Mysterious ingredient?";
+                return "Misterioso";
         }
     }
 
@@ -71,13 +71,13 @@ public class RecipeSystem : MonoBehaviour
             return false;
         }
 
-        List<string> sortedCauldron = cauldronIngredients.OrderBy(x => x).ToList();
-        List<string> sortedOrder = orderIngredients.OrderBy(x => x).ToList();
+        List<string> sortedCauldron = cauldronIngredients.Select(x => x.Trim()).OrderBy(x => x).ToList();
+        List<string> sortedOrder = orderIngredients.Select(x => x.Trim()).OrderBy(x => x).ToList();
 
-        bool hasLiquid = sortedCauldron.Any(item => liquids.Contains(item));        
+        bool hasLiquid = sortedCauldron.Any(item => liquids.Any(liquid => liquid.Trim() == item));
         if (!hasLiquid)
         {
-            Debug.Log("A liquid is missing");
+            Debug.Log($"A liquid is missing. Cauldron: {string.Join(", ", sortedCauldron)} | Order: {string.Join(", ", sortedOrder)}");
             return false;
         }
 
@@ -85,7 +85,7 @@ public class RecipeSystem : MonoBehaviour
         {
             if (sortedCauldron[i] != sortedOrder[i])
             {
-                Debug.Log("An ingredient is wrong or missing.");
+                Debug.Log($"An ingredient is wrong or missing. Cauldron: {string.Join(", ", sortedCauldron)} | Order: {string.Join(", ", sortedOrder)}");
                 return false;
             }
         }

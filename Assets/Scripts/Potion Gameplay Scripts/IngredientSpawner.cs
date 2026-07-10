@@ -72,9 +72,14 @@ public class IngredientSpawner : MonoBehaviour
                 Destroy(ingredientInTable.Value);
             }
         }
-        activeIngredients.Clear(); //Limpia el diccionario de ingredientes activos
-
         ShufflePositions();
+
+        activeIngredients.Clear(); //Limpia y reconstruye el diccionario con las posiciones barajadas
+        foreach (Transform position in spawnPositions)
+        {
+            activeIngredients[position] = null;
+        }
+
         SpawnAllIngredients();
     }
 

@@ -1,6 +1,6 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Collections;
 
 public enum SubstanceType
 {
@@ -12,29 +12,35 @@ public enum SubstanceType
 public class SubstanceManager : MonoBehaviour
 {
     public static SubstanceManager Instance { get; private set; }
-    // Configuración inicial
-    public int initialCocaAmount = 5;
-    public int initialExtasisAmount = 5;
-    public float effectDuration = 10f;
-    public float intoxicationProbability = 0.3f;
-    public float intoxicationDuration = 5f;
-    public float cocaSpeedMultiplier = 1.5f;
-    public float extasisSpeedMultiplier = 0.7f;
-    public float abstinenceTime = 12f;
-    public float abstinenceFadeDuration = 12f;
-    public float consumptionFadeToBlackDuration = 3f;
-    public float consumptionFadeToClearDuration = 1f;
-    
-    // Referencias
-    public VisualEffectsController visualEffects;
-    public GameManager gameManager;
-    
-    // Eventos opcionales
-    public UnityEvent<SubstanceType> OnSubstanceConsumed;
-    public UnityEvent OnEffectEnded;
-    public UnityEvent OnIntoxication;
 
-    // Estado privado
+    [Header("Inventory")]
+    [SerializeField] private int initialCocaAmount = 5;
+    [SerializeField] private int initialExtasisAmount = 5;
+
+    [Header("Effect Timing")]
+    [SerializeField] private float effectDuration = 18f;
+    [SerializeField] private float abstinenceTime = 20f;
+    [SerializeField] private float abstinenceFadeDuration = 20f;
+    [SerializeField] private float consumptionFadeToBlackDuration = 1.25f;
+    [SerializeField] private float consumptionFadeToClearDuration = 0.75f;
+
+    [Header("Risk")]
+    [SerializeField] private float intoxicationProbability = 0.3f;
+    [SerializeField] private float intoxicationDuration = 5f;
+
+    [Header("Movement")]
+    [SerializeField] private float cocaSpeedMultiplier = 1.5f;
+    [SerializeField] private float extasisSpeedMultiplier = 0.7f;
+
+    [Header("References")]
+    [SerializeField] private VisualEffectsController visualEffects;
+    [SerializeField] private GameManager gameManager;
+
+    [Header("Events")]
+    [SerializeField] private UnityEvent<SubstanceType> OnSubstanceConsumed;
+    [SerializeField] private UnityEvent OnEffectEnded;
+    [SerializeField] private UnityEvent OnIntoxication;
+
     private SubstanceType currentActiveSubstance = SubstanceType.None;
     private float currentEffectTimer = 0f;
     private int cocaInventory;
@@ -58,12 +64,16 @@ public class SubstanceManager : MonoBehaviour
 
         cocaInventory = initialCocaAmount;
         extasisInventory = initialExtasisAmount;
-        
+
         if (visualEffects == null)
+        {
             visualEffects = GetComponent<VisualEffectsController>();
-        
+        }
+
         if (gameManager == null)
+        {
             gameManager = FindFirstObjectByType<GameManager>();
+        }
     }
 
     void OnDestroy()
@@ -76,11 +86,15 @@ public class SubstanceManager : MonoBehaviour
 
     void Update()
     {
-        if (gameManager != null && !gameManager.IsGameActive)
+        if (gameManager != null && !gameManager.IsGameplayInputEnabled)
+        {
             return;
+        }
 
         if (isActivatingSubstance)
+        {
             return;
+        }
 
         if (currentActiveSubstance != SubstanceType.None && !isIntoxicated)
         {
@@ -96,12 +110,12 @@ public class SubstanceManager : MonoBehaviour
         else if (!isIntoxicated)
         {
             timeWithoutEffect += Time.deltaTime;
-            
+
             if (!abstinenceFadeStarted && timeWithoutEffect >= 0.1f)
             {
                 StartAbstinenceFade();
             }
-            
+
             if (timeWithoutEffect >= abstinenceTime)
             {
                 TriggerAbstinence();
@@ -127,6 +141,50 @@ public class SubstanceManager : MonoBehaviour
     public float GetCocaSpeedMultiplier() => cocaSpeedMultiplier;
     public float GetExtasisSpeedMultiplier() => extasisSpeedMultiplier;
 
+    public void ConfigureForDifficulty(int difficulty)
+    {
+        ResetEffectState();
+        RefillInventory();
+
+        switch (difficulty)
+        {
+            case 1:
+                effectDuration = 20f;
+                abstinenceTime = 24f;
+                abstinenceFadeDuration = 24f;
+                intoxicationProbability = 0.2f;
+                break;
+            case 2:
+                effectDuration = 18f;
+                abstinenceTime = 21f;
+                abstinenceFadeDuration = 21f;
+                intoxicationProbability = 0.3f;
+                break;
+            case 3:
+                effectDuration = 16f;
+                abstinenceTime = 18f;
+                abstinenceFadeDuration = 18f;
+                intoxicationProbability = 0.4f;
+                break;
+        }
+
+        consumptionFadeToBlackDuration = 1.25f;
+        consumptionFadeToClearDuration = 0.75f;
+    }
+
+    public void RefillInventory()
+    {
+        cocaInventory = initialCocaAmount;
+        extasisInventory = initialExtasisAmount;
+
+        if (gameManager != null)
+        {
+            gameManager.UpdateSubstanceCounters();
+        }
+
+        RefreshSubstanceObjects();
+    }
+
     private bool ConsumeSubstance(SubstanceType type)
     {
         if (GetInventoryAmount(type) <= 0)
@@ -137,7 +195,7 @@ public class SubstanceManager : MonoBehaviour
 
         if (isIntoxicated)
         {
-            Debug.LogWarning("No puedes consumir más sustancias mientras estás intoxicado");
+            Debug.LogWarning("No puedes consumir mas sustancias mientras estas intoxicado");
             return false;
         }
 
@@ -157,19 +215,9 @@ public class SubstanceManager : MonoBehaviour
             TriggerIntoxication();
             DeductFromInventory(type);
         }
-        
+
         return true;
     }
-
-    // private bool HasSubstanceInInventory(SubstanceType type)
-    // {
-    //     return type switch
-    //     {
-    //         SubstanceType.Coca => cocaInventory > 0,
-    //         SubstanceType.Extasis => extasisInventory > 0,
-    //         _ => false
-    //     };
-    // }
 
     private int GetInventoryAmount(SubstanceType type)
     {
@@ -184,14 +232,20 @@ public class SubstanceManager : MonoBehaviour
     private void DeductFromInventory(SubstanceType type)
     {
         if (type == SubstanceType.Coca)
+        {
             cocaInventory--;
+        }
         else if (type == SubstanceType.Extasis)
+        {
             extasisInventory--;
+        }
 
         if (gameManager != null)
         {
             gameManager.UpdateSubstanceCounters();
         }
+
+        RefreshSubstanceObjects();
     }
 
     private void StartActivationAfterConsumptionFade(SubstanceType type)
@@ -200,10 +254,10 @@ public class SubstanceManager : MonoBehaviour
         timeWithoutEffect = 0f;
         abstinenceFadeStarted = false;
 
-        if (gameManager != null && gameManager.fadeController != null)
+        if (gameManager != null && gameManager.FadeController != null)
         {
-            gameManager.fadeController.StopFade();
-            gameManager.fadeController.FadeToBlackAndClear(
+            gameManager.FadeController.StopFade();
+            gameManager.FadeController.FadeToBlackAndClear(
                 consumptionFadeToBlackDuration,
                 consumptionFadeToClearDuration,
                 () => ActivateEffect(type));
@@ -221,10 +275,10 @@ public class SubstanceManager : MonoBehaviour
         currentEffectTimer = effectDuration;
         timeWithoutEffect = 0f;
         abstinenceFadeStarted = false;
-        
+
         ApplyVisualEffects(type);
         OnSubstanceConsumed?.Invoke(type);
-        
+
         Debug.Log($"Efecto de {type} activado por {effectDuration}s");
     }
 
@@ -234,10 +288,10 @@ public class SubstanceManager : MonoBehaviour
         timeWithoutEffect = 0f;
         abstinenceFadeStarted = false;
 
-        if (gameManager != null && gameManager.fadeController != null)
+        if (gameManager != null && gameManager.FadeController != null)
         {
-            gameManager.fadeController.StopFade();
-            gameManager.fadeController.FadeToBlackAndClear(
+            gameManager.FadeController.StopFade();
+            gameManager.FadeController.FadeToBlackAndClear(
                 consumptionFadeToBlackDuration,
                 consumptionFadeToClearDuration,
                 () =>
@@ -276,14 +330,19 @@ public class SubstanceManager : MonoBehaviour
 
     private void TriggerIntoxication()
     {
-        if (isIntoxicated) return;
-        
+        if (isIntoxicated)
+        {
+            return;
+        }
+
         isIntoxicated = true;
-        Debug.Log("¡INTOXICACIÓN!");
-        
+        Debug.Log("INTOXICACION!");
+
         if (visualEffects != null)
+        {
             visualEffects.ApplyIntoxicationEffect();
-        
+        }
+
         OnIntoxication?.Invoke();
         StartCoroutine(HandleIntoxication());
     }
@@ -291,35 +350,41 @@ public class SubstanceManager : MonoBehaviour
     private IEnumerator HandleIntoxication()
     {
         yield return new WaitForSeconds(intoxicationDuration);
-        
+
         if (gameManager != null)
+        {
             gameManager.GameOverIntoxication();
+        }
         else
+        {
             Debug.LogError("GameManager no asignado!");
+        }
     }
 
     private void EndEffect()
     {
         Debug.Log($"Efecto de {currentActiveSubstance} terminado");
-        
+
         currentActiveSubstance = SubstanceType.None;
         currentEffectTimer = 0f;
         timeWithoutEffect = 0f;
-        
+
         if (visualEffects != null)
+        {
             visualEffects.ResetEffects();
-        
+        }
+
         OnEffectEnded?.Invoke();
     }
 
     private void StartAbstinenceFade()
     {
         abstinenceFadeStarted = true;
-        
-        if (gameManager != null && gameManager.fadeController != null)
+
+        if (gameManager != null && gameManager.FadeController != null)
         {
             Debug.Log("Iniciando fade de abstinencia...");
-            gameManager.fadeController.FadeToBlack(abstinenceFadeDuration);
+            gameManager.FadeController.FadeToBlack(abstinenceFadeDuration);
         }
     }
 
@@ -333,7 +398,10 @@ public class SubstanceManager : MonoBehaviour
 
     private void ApplyVisualEffects(SubstanceType type)
     {
-        if (visualEffects == null) return;
+        if (visualEffects == null)
+        {
+            return;
+        }
 
         switch (type)
         {
@@ -343,6 +411,31 @@ public class SubstanceManager : MonoBehaviour
             case SubstanceType.Extasis:
                 visualEffects.ApplyExtasisEffect();
                 break;
+        }
+    }
+
+    private void ResetEffectState()
+    {
+        StopAllCoroutines();
+        currentActiveSubstance = SubstanceType.None;
+        currentEffectTimer = 0f;
+        timeWithoutEffect = 0f;
+        abstinenceFadeStarted = false;
+        isActivatingSubstance = false;
+        isIntoxicated = false;
+
+        if (visualEffects != null)
+        {
+            visualEffects.ResetEffects();
+        }
+    }
+
+    private void RefreshSubstanceObjects()
+    {
+        SubstanceObject[] substanceObjects = FindObjectsByType<SubstanceObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (SubstanceObject substanceObject in substanceObjects)
+        {
+            substanceObject.RefreshVisibility();
         }
     }
 }

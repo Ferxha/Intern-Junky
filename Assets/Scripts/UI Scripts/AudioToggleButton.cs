@@ -48,10 +48,6 @@ public class AudioToggleButton : MonoBehaviour
                 buttonImage.sprite = audioOffIcon;
         }
         
-        if (buttonText != null)
-        {
-            buttonText.text = isAudioOn ? "Audio: ON" : "Audio: OFF";
-        }
     }
 
     void ApplyAudioState()
