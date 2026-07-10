@@ -1,15 +1,24 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FadeController : MonoBehaviour
 {
     private CanvasGroup canvasGroup;
+    private Image image;
     public float fadeToBlackDuration = 3f;
     public float fadeToClearDuration = 1f;
 
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
+        image = GetComponent<Image>();
+
+        if (image != null)
+        {
+            image.raycastTarget = false;
+        }
+
         if (canvasGroup == null)
         {
             Debug.LogError("FadeController necesita un CanvasGroup en el mismo GameObject!");
@@ -19,6 +28,7 @@ public class FadeController : MonoBehaviour
             // Empezar totalmente transparente y sin bloquear interacciones
             canvasGroup.alpha = 0;
             canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
             Debug.Log($"✓ FadeController inicializado. CanvasGroup encontrado. Alpha inicial: {canvasGroup.alpha}");
         }
     }
@@ -50,11 +60,27 @@ public class FadeController : MonoBehaviour
         StartCoroutine(FadeToClearRoutine(duration));
     }
 
+    public void FadeToBlackAndClear(float fadeToBlackTime = 1f, float fadeToClearTime = -1f)
+    {
+        if (canvasGroup == null)
+        {
+            Debug.LogError("No se puede hacer fade: CanvasGroup no encontrado!");
+            return;
+        }
+
+        if (fadeToClearTime < 0) fadeToClearTime = fadeToClearDuration;
+
+        StopAllCoroutines();
+        StartCoroutine(FadeToBlackAndClearRoutine(fadeToBlackTime, fadeToClearTime));
+    }
+
     public void FadeToBlackInstant()
     {
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 1;
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
         }
     }
 
@@ -63,6 +89,8 @@ public class FadeController : MonoBehaviour
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0;
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
         }
     }
 
@@ -70,7 +98,8 @@ public class FadeController : MonoBehaviour
     {
         if (canvasGroup == null) yield break;
 
-        canvasGroup.blocksRaycasts = true;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.interactable = false;
         
         float elapsedTime = 0f;
         float startAlpha = canvasGroup.alpha;
@@ -85,18 +114,26 @@ public class FadeController : MonoBehaviour
         Debug.Log($"Fade to black completado. Alpha final: {canvasGroup.alpha}");
     }
 
+    private IEnumerator FadeToBlackAndClearRoutine(float fadeToBlackTime, float fadeToClearTime)
+    {
+        yield return FadeToBlackRoutine(fadeToBlackTime);
+        yield return FadeToClearRoutine(fadeToClearTime);
+    }
+
     private IEnumerator FadeToClearRoutine(float duration)
     {
         if (canvasGroup == null) yield break;
 
         float elapsedTime = 0f;
+        float startAlpha = canvasGroup.alpha;
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Clamp01(1 - (elapsedTime / duration));
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsedTime / duration);
             yield return null;
-        canvasGroup.blocksRaycasts = false;
         }
         canvasGroup.alpha = 0;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.interactable = false;
     }
 }

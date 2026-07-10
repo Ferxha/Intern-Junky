@@ -11,6 +11,7 @@ public enum SubstanceType
 
 public class SubstanceManager : MonoBehaviour
 {
+    public static SubstanceManager Instance { get; private set; }
     // Configuración inicial
     public int initialCocaAmount = 5;
     public int initialExtasisAmount = 5;
@@ -21,6 +22,8 @@ public class SubstanceManager : MonoBehaviour
     public float extasisSpeedMultiplier = 0.7f;
     public float abstinenceTime = 12f;
     public float abstinenceFadeDuration = 12f;
+    public float consumptionFadeToBlackDuration = 3f;
+    public float consumptionFadeToClearDuration = 1f;
     
     // Referencias
     public VisualEffectsController visualEffects;
@@ -42,6 +45,16 @@ public class SubstanceManager : MonoBehaviour
 
     void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         cocaInventory = initialCocaAmount;
         extasisInventory = initialExtasisAmount;
         
@@ -50,6 +63,14 @@ public class SubstanceManager : MonoBehaviour
         
         if (gameManager == null)
             gameManager = FindFirstObjectByType<GameManager>();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     void Update()
@@ -141,15 +162,15 @@ public class SubstanceManager : MonoBehaviour
         return true;
     }
 
-    private bool HasSubstanceInInventory(SubstanceType type)
-    {
-        return type switch
-        {
-            SubstanceType.Coca => cocaInventory > 0,
-            SubstanceType.Extasis => extasisInventory > 0,
-            _ => false
-        };
-    }
+    // private bool HasSubstanceInInventory(SubstanceType type)
+    // {
+    //     return type switch
+    //     {
+    //         SubstanceType.Coca => cocaInventory > 0,
+    //         SubstanceType.Extasis => extasisInventory > 0,
+    //         _ => false
+    //     };
+    // }
 
     private int GetInventoryAmount(SubstanceType type)
     {
@@ -167,6 +188,12 @@ public class SubstanceManager : MonoBehaviour
             cocaInventory--;
         else if (type == SubstanceType.Extasis)
             extasisInventory--;
+
+        if (gameManager != null)
+        {
+            gameManager.UpdateSubstanceCounters();
+            PlayConsumptionFade();
+        }
     }
 
     private void ActivateEffect(SubstanceType type)
@@ -186,6 +213,16 @@ public class SubstanceManager : MonoBehaviour
         OnSubstanceConsumed?.Invoke(type);
         
         Debug.Log($"Efecto de {type} activado por {effectDuration}s");
+    }
+
+    private void PlayConsumptionFade()
+    {
+        if (gameManager == null || gameManager.fadeController == null)
+        {
+            return;
+        }
+
+        gameManager.fadeController.FadeToBlackAndClear(consumptionFadeToBlackDuration, consumptionFadeToClearDuration);
     }
 
     private void ProlongEffect()

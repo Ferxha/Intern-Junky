@@ -11,14 +11,13 @@ public class VisualEffectsController : MonoBehaviour
     // Componentes de efectos
     private Bloom bloom;
     private ColorAdjustments colorAdjustments;
-    private Vignette vignette;
     private ChromaticAberration chromaticAberration;
     private WhiteBalance whiteBalance;
     private bool effectsInitialized = false;
     
     // Configuración de efectos Coca
     public float cocaBloomIntensity = 3f;
-    public float cocaWhiteBalanceTemperature = 25f;
+    public float cocaWhiteBalanceTemperature = 35f;
     public float cocaSaturation = 15f;
     
     // Configuración de efectos Éxtasis
@@ -28,7 +27,6 @@ public class VisualEffectsController : MonoBehaviour
     
     // Configuración de intoxicación
     public float intoxicationChromaticAberration = 0.8f;
-    public float intoxicationVignetteIntensity = 0.6f;
     public float intoxicationSaturation = -30f;
     
     void Awake()
@@ -92,16 +90,12 @@ public class VisualEffectsController : MonoBehaviour
         Debug.Log("¡Aplicando efecto de INTOXICACIÓN!");
         
         // Aplicar solo distorsión cromática y desaturación
-        // NO aplicar vignette porque interferirá con el fade to black
         if (chromaticAberration != null)
             chromaticAberration.intensity.value = intoxicationChromaticAberration;
         
         if (colorAdjustments != null)
             colorAdjustments.saturation.value = intoxicationSaturation;
             
-        // Comentado para evitar conflicto con FadeController
-        // if (vignette != null)
-        //     vignette.intensity.value = intoxicationVignetteIntensity;
     }
 
     public void ResetEffects()
@@ -118,10 +112,7 @@ public class VisualEffectsController : MonoBehaviour
         {
             colorAdjustments.saturation.value = 0f;
             colorAdjustments.hueShift.value = 0f;
-        }
-        
-        if (vignette != null)
-            vignette.intensity.value = 0f;
+        }        
         
         if (chromaticAberration != null)
             chromaticAberration.intensity.value = 0f;
@@ -146,11 +137,6 @@ public class VisualEffectsController : MonoBehaviour
         {
             Debug.LogWarning("Color Adjustments no encontrado en el Volume Profile.");
             effectsInitialized = false;
-        }
-
-        if (!globalVolume.profile.TryGet(out vignette))
-        {
-            Debug.LogWarning("Vignette no encontrado en el Volume Profile.");
         }
 
         if (!globalVolume.profile.TryGet(out chromaticAberration))

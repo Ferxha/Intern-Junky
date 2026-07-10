@@ -6,6 +6,7 @@ public class MouseLook : MonoBehaviour
     // Configuración
     public float mouseSensitivity = 100f;
     public Transform playerBody;
+    public SubstanceManager substanceManager;
     
     // Privados
     private float xRotation = 0f;
@@ -23,6 +24,9 @@ public class MouseLook : MonoBehaviour
                 Debug.LogError("MouseLook necesita referencia al Player Body!");
             }
         }
+        
+        if (substanceManager == null)
+            substanceManager = FindFirstObjectByType<SubstanceManager>();
     }
 
     void OnEnable()
@@ -41,14 +45,10 @@ public class MouseLook : MonoBehaviour
         if (GameManager.Instance != null && !GameManager.Instance.IsGameActive)
             return;
         
-        if (Cursor.lockState != CursorLockMode.Locked)
-        {
-            if (Mouse.current.leftButton.wasPressedThisFrame)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-            return;
-        }
+        UpdateCursorState();
+        
+        // if (Cursor.lockState != CursorLockMode.Locked)
+        //     return;
 
         Vector2 lookInput = inputActions.Player.Look.ReadValue<Vector2>();
         
@@ -63,6 +63,24 @@ public class MouseLook : MonoBehaviour
         if (playerBody != null)
         {
             playerBody.Rotate(Vector3.up * mouseX);
+        }
+    }
+
+    void UpdateCursorState()
+    {
+        if (substanceManager == null) return;
+        
+        bool hasActiveEffect = substanceManager.GetCurrentSubstance() != SubstanceType.None;
+        
+        if (hasActiveEffect)
+        {
+            // Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }
