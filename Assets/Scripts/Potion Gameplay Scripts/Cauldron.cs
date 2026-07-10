@@ -1,13 +1,19 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class Cauldron : MonoBehaviour
 {
+    //Script del caldero: Valida que ingredientes han entrado al caldero y compara con la orden del momento 
+    [SerializeField] private GameObject cauldronSmokeFXPrefab;
     [SerializeField] private RecipeSystem recipeSystem;
-    
-    private RecipeSystem.PotionOrder currentOrder;
     [SerializeField] private List<string> ingredientsInside = new List<string>();
+    private RecipeSystem.PotionOrder currentOrder;
     private IngredientSpawner ingredientSpawner;
+    //AQUI SE AGREGARIA LA LOGICA DE LA DIFICULTAD DE NIVEL Y QUE CUMPLA CON X CANTIDAD DE PEDIDOS ANTES DE QUE EL TIEMPO ACABE
+    //O EN UN GAME MANAGER MANDAR A LLAMAR SOLO LA VARIABLE DE orderCount
+    [SerializeField] private int ordersTotal; //Afectado por la dificultad, está variable se va a localizar donde se asigne el método donde compare contidad de órdenes con las pendientes y el tiempo
+    private int orderCount = 0;
 
     void Start()
     {
@@ -21,6 +27,7 @@ public class Cauldron : MonoBehaviour
         RequestNewOrder();
     }
 
+    //Solicita nueva orden
     void RequestNewOrder()
     {
         currentOrder = recipeSystem.GenerateRandomOrder();
@@ -29,6 +36,7 @@ public class Cauldron : MonoBehaviour
     }
     private Ingredient ingredient;
 
+    //Cuando un objeto colisiona con el caldero actualiza la lista y desaparece
     void OnCollisionEnter(Collision collision)
     {
         ingredient = collision.gameObject.GetComponent<Ingredient>();
@@ -38,6 +46,11 @@ public class Cauldron : MonoBehaviour
             ingredientsInside.Add(ingredient.ingredientName);
             
             AudioManager.Instance.PlaySFXCauldron(); 
+            if (cauldronSmokeFXPrefab != null)
+            {
+                // Spawnear el humo justo donde chocó el ingrediente
+                Instantiate(cauldronSmokeFXPrefab, collision.contacts[0].point, cauldronSmokeFXPrefab.transform.rotation);
+            }
             ingredient.transform.SetParent(null);
             ingredient.ConsumedIngredient();
 
@@ -48,6 +61,7 @@ public class Cauldron : MonoBehaviour
         }
     }
 
+    //Método para evaluar si los ingredientes son los de la orden, indica éxito o fracaso
     void EvaluatePotion()
     {
         bool hasSameIngredients = recipeSystem.AreSameIngredients(ingredientsInside, currentOrder.requiredIngredients);
@@ -56,8 +70,7 @@ public class Cauldron : MonoBehaviour
         {
             Debug.Log("Success!");
             AudioManager.Instance.PlaySFXPotionSuccess();
-            //AQUI SE AGREGA +1 AL CONTADOR DE LA UI
-
+            orderCount++;
         } else
         {
             Debug.Log("Failure.");

@@ -3,22 +3,15 @@ using UnityEngine;
 public class Ingredient : MonoBehaviour
 {
     public string ingredientName;
-    
     public Transform spawnPosition; // Se asigna por el IngredientSpawner
     private IngredientSpawner ingredientSpawner;
 
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         ingredientSpawner = GameObject.Find("Ingredient Spawner").GetComponent<IngredientSpawner>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-    
+    //Método ConsumedIngredient: Indica la posición del objeto y lo destrulle
     public void ConsumedIngredient()
     {
         if (ingredientSpawner != null)
@@ -27,7 +20,7 @@ public class Ingredient : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"{ingredientName}: ingredientSpawner es null, no se puede reportar destrucción.");
+            Debug.LogWarning($"{ingredientName}: Null IngredientSpawner");
         }
 
         Destroy(gameObject);

@@ -4,16 +4,18 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    //Script movimiento y acciones del jugador
     [SerializeField] private float moveSpeed = 5f;
 
     public float cameraLookSensitivity = 100f;
+    private float horizontalRotation = 0f;
+    private float verticalRotation = 0f;
     [SerializeField] private float lookLimit = 90f;
     [SerializeField] private Transform playerCamera;
 
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private Transform grabbedObjectPosition;
-    private float horizontalRotation = 0f;
-    private float verticalRotation = 0f;
+
     private GameObject grabbedObject = null;
 
     private CharacterController characterController;
@@ -32,34 +34,26 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log(controls.Player.Look);
     }
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = true;
-
-        horizontalRotation = 0f;
-        verticalRotation = 0f;
-
-        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
-        if (playerCamera != null)
-        {
-            playerCamera.localRotation = Quaternion.identity; // Esto es equivalente a (0, 0, 0)
-        }
     }
 
-    // Update is called once per frame
     void Update()
     {
         HandleCameraLookMovement();
         HandlePlayerInteraction();
     }
 
+    //Se mueve movimiento a Fixed Update para mayor precisión
     void FixedUpdate()
     {
         HandlePlayerMovement();
     }
 
+    //Método encargado del movimiento del jugador
     void HandlePlayerMovement()
     {
         Vector2 moveInput = controls.Player.Move.ReadValue<Vector2>();
@@ -68,6 +62,7 @@ public class PlayerMovement : MonoBehaviour
         characterController.Move(moveDirection * moveSpeed * Time.fixedDeltaTime);
     }
 
+    //Método encargado del movimiento de la cámara
     void HandleCameraLookMovement()
     {
         Vector2 lookInput = controls.Player.Look.ReadValue<Vector2>();
@@ -84,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    //Método encargado de las interacciones del jugador manda a llamar GrabObject y DropObject
     void HandlePlayerInteraction()
     {
         if (grabbedObject != null)
@@ -117,6 +113,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //GrabObject: Selecciona un objeto y lo anida al jugador
     void GrabObject()
     {
         Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
@@ -131,6 +128,7 @@ public class PlayerMovement : MonoBehaviour
         grabbedObject.transform.SetParent(grabbedObjectPosition);
     }
 
+    //DropObject: Suelta el objeto, ya no es hijo del jugador y recupera sus características del rigidbody originales
     void DropObject()
     {
         grabbedObject.transform.SetParent(null);
@@ -145,6 +143,7 @@ public class PlayerMovement : MonoBehaviour
         grabbedObject = null;
     }
 
+    //Gizmos de control
     void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;

@@ -3,16 +3,15 @@ using System.Collections.Generic;
 
 public class IngredientSpawner : MonoBehaviour
 {
-    
+    //Script controlador de la lista de ingredientes a spawnear y lista de sus ubicaciones
     [SerializeField] private List<GameObject> ingredientPrefabs;
-    [SerializeField] private List<Transform> spawnPositions; //ACTUALIZAR EN INSPECTOR CUANDO SE TENGA LA MESA DE TRABAJO DEFINIDA
+    [SerializeField] private List<Transform> spawnPositions;
 
     // Diccionario para saber qué punto de spawn está ocupado por cuál ingrediente
     private Dictionary<Transform, GameObject> activeIngredients = new Dictionary<Transform, GameObject>();
 
     void Awake()
     {
-        //Limpiar las posiciones de spawn para evitar ingredientes activos sorpresa
         foreach (Transform position in spawnPositions)
         {
             activeIngredients[position] = null;
@@ -61,14 +60,12 @@ public class IngredientSpawner : MonoBehaviour
             activeIngredients[position] = null;
         }
         
-        // Reaparece uno nuevo inmediatamente en ese hueco libre
         SpawnAllIngredients();
     }
 
     // Limpia la mesa por completo para barajar nuevas posiciones (al terminar la poción)
     public void RespawnEverythingInNewPositions()
     {
-        // Limpia la mesa de ingredientes
         foreach (var ingredientInTable in activeIngredients)
         {
             if (ingredientInTable.Value != null) {
@@ -81,6 +78,7 @@ public class IngredientSpawner : MonoBehaviour
         SpawnAllIngredients();
     }
 
+    // Mezcla de posiciones
     public void ShufflePositions()
     {
         for (int i = 0; i < spawnPositions.Count; i++)

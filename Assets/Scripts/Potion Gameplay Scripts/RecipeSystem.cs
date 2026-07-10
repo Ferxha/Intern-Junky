@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class RecipeSystem : MonoBehaviour
 {
+    //Script de sistema de creación de pedidos/recetas y nombre de pociones
     private List<string> liquids = new List<string> {"Green Liquid","Blue Liquid"};
     private List<string> solids = new List<string> {"Goat's Eye", "Hawk Feather", "Dragon's Scale"};
     
+    //Estructura de datos: nombre + lista de 3 ingredientes
     public struct PotionOrder
     {
         public string potionName;
         public List<string> requiredIngredients;
     }
     
+    //Crea la poción de forma aleatoria mezclando las listad de ingredientes 1 liquido + 2 sólidos (pueden repetirse) 
     public PotionOrder GenerateRandomOrder()
     {
         PotionOrder newOrder;
@@ -33,6 +36,7 @@ public class RecipeSystem : MonoBehaviour
         return newOrder;
     }
 
+    //Método para crear el nombre de la poción con base en la orden generada
     public string BuildPotionName(string liquid, string solid1, string solid2)
     {
         string generatedName = (liquid == "Green Liquid") ? "Tonic" : "Potion";
@@ -42,6 +46,8 @@ public class RecipeSystem : MonoBehaviour
 
         return $"{adjective1} {adjective2} {generatedName}";
     }
+
+    //Método para obtener el adjetivo según la posición del ingrediente sólido
     private string GetIngredientAdjective(string ingredientName, int propertyIndex)
     {
         switch (ingredientName)
@@ -57,6 +63,7 @@ public class RecipeSystem : MonoBehaviour
         }
     }
 
+    //Método compara si son iguales las listas de ingredientes de la orden y el caldero
     public bool AreSameIngredients(List<string> cauldronIngredients, List<string> orderIngredients)
     {
         if (cauldronIngredients.Count != orderIngredients.Count)
