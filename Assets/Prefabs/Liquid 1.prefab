@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fabf49f7ed95bb44a776a475f821342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ingredient
-  ingredientName: Green liquid
+  ingredientName: Green Liquid
   spawnPosition: {fileID: 0}
 --- !u!114 &733801663461607330
 MonoBehaviour:

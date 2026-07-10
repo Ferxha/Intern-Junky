@@ -554,7 +554,7 @@ Transform:
   m_GameObject: {fileID: 404887704}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.16605, y: 0.15328, z: 1.69105}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1026,7 +1026,7 @@ Transform:
   m_GameObject: {fileID: 742681730}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.23, y: 0.95, z: 0}
+  m_LocalPosition: {x: 7.52, y: 0.95, z: 2.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1106,7 +1106,7 @@ Transform:
   m_GameObject: {fileID: 847235450}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.54, y: 0.95, z: -1.95}
+  m_LocalPosition: {x: 8.09, y: 0.95, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1237,6 +1237,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10c7ff2001d756b418a9474e252519aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cauldron
+  recipeSystem: {fileID: 1342855845}
+  ingredientsInside: []
 --- !u!1 &1172072371
 GameObject:
   m_ObjectHideFlags: 0
@@ -1262,7 +1264,7 @@ Transform:
   m_GameObject: {fileID: 1172072371}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 7.0499997, y: 0.95, z: 0}
+  m_LocalPosition: {x: 11, y: 0.95, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1294,7 +1296,7 @@ Transform:
   m_GameObject: {fileID: 1342855843}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.09364, y: 2.81769, z: -2.195}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1337,7 +1339,7 @@ Transform:
   m_GameObject: {fileID: 1397303172}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.38, y: 0.95, z: -1.95}
+  m_LocalPosition: {x: 4.04, y: 0.95, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1404,7 +1406,7 @@ Transform:
   m_GameObject: {fileID: 1622955113}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.38, y: 0.95, z: 0}
+  m_LocalPosition: {x: 3.38, y: 0.95, z: 2.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
