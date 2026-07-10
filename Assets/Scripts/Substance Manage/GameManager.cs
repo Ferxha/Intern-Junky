@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Difficulty")]
     [SerializeField] private float gameDuration = 120f;
+    [SerializeField] private float warningDisplayDuration = 4f;
 
     private int currentOrderCount = 0;
     private int targetOrderCount;
@@ -42,8 +43,10 @@ public class GameManager : MonoBehaviour
     private bool isPresentingOrder;
     private string currentOrderName;
     private GameObject ordersPanel;
+    private GameObject warningPanel;
     private TextMeshProUGUI orderText;
     private TextMeshProUGUI timerText;
+    private static bool warningShownThisPlaySession;
 
     public bool IsGameActive => isGameActive;
     public bool IsGameplayInputEnabled => isGameActive && !isPresentingOrder;
@@ -76,6 +79,7 @@ public class GameManager : MonoBehaviour
         remainingGameTime = gameDuration;
         SetMenuCursor();
         HideOrdersPanel();
+        ShowWarningOnce();
         UpdateSubstanceCounters();
         UpdateOrderCounter();
         UpdateTimerText();
@@ -382,6 +386,11 @@ public class GameManager : MonoBehaviour
             ordersPanel = FindGameObjectByName("Orders Panel");
         }
 
+        if (warningPanel == null)
+        {
+            warningPanel = FindGameObjectByName("Warning Panel");
+        }
+
         if (orderText == null)
         {
             GameObject orderTextObject = FindGameObjectByName("Order Text");
@@ -448,6 +457,35 @@ public class GameManager : MonoBehaviour
         if (ordersPanel != null)
         {
             ordersPanel.SetActive(false);
+        }
+    }
+
+    private void ShowWarningOnce()
+    {
+        if (warningPanel == null)
+        {
+            return;
+        }
+
+        if (warningShownThisPlaySession)
+        {
+            warningPanel.SetActive(false);
+            return;
+        }
+
+        warningShownThisPlaySession = true;
+        warningPanel.SetActive(true);
+        warningPanel.transform.SetAsLastSibling();
+        StartCoroutine(HideWarningRoutine());
+    }
+
+    private IEnumerator HideWarningRoutine()
+    {
+        yield return new WaitForSeconds(warningDisplayDuration);
+
+        if (warningPanel != null)
+        {
+            warningPanel.SetActive(false);
         }
     }
 

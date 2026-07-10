@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 6918906350524010474}
   - component: {fileID: 2103491415459241693}
   - component: {fileID: 7597165831472619018}
-  - component: {fileID: 7592937756323417513}
   m_Layer: 0
   m_Name: Element 3
   m_TagString: Ingredient
@@ -418,17 +417,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7592937756323417513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2209306517436257028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fabf49f7ed95bb44a776a475f821342, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Ingredient
-  ingredientName: Hawk Feather
-  spawnPosition: {fileID: 0}
