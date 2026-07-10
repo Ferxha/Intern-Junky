@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
     {
         if (orderCountText != null)
         {
-            orderCountText.text = $"Orders: {currentOrderCount}/{orderCount}";
+            orderCountText.text = $" {currentOrderCount}/{orderCount}";
         }
     }
 
