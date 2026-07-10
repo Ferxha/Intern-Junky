@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -60,18 +61,19 @@ public class FadeController : MonoBehaviour
         StartCoroutine(FadeToClearRoutine(duration));
     }
 
-    public void FadeToBlackAndClear(float fadeToBlackTime = 1f, float fadeToClearTime = -1f)
+    public void FadeToBlackAndClear(float fadeToBlackTime = 1f, float fadeToClearTime = -1f, Action onComplete = null)
     {
         if (canvasGroup == null)
         {
             Debug.LogError("No se puede hacer fade: CanvasGroup no encontrado!");
+            onComplete?.Invoke();
             return;
         }
 
         if (fadeToClearTime < 0) fadeToClearTime = fadeToClearDuration;
 
         StopAllCoroutines();
-        StartCoroutine(FadeToBlackAndClearRoutine(fadeToBlackTime, fadeToClearTime));
+        StartCoroutine(FadeToBlackAndClearRoutine(fadeToBlackTime, fadeToClearTime, onComplete));
     }
 
     public void FadeToBlackInstant()
@@ -114,10 +116,11 @@ public class FadeController : MonoBehaviour
         Debug.Log($"Fade to black completado. Alpha final: {canvasGroup.alpha}");
     }
 
-    private IEnumerator FadeToBlackAndClearRoutine(float fadeToBlackTime, float fadeToClearTime)
+    private IEnumerator FadeToBlackAndClearRoutine(float fadeToBlackTime, float fadeToClearTime, Action onComplete)
     {
         yield return FadeToBlackRoutine(fadeToBlackTime);
         yield return FadeToClearRoutine(fadeToClearTime);
+        onComplete?.Invoke();
     }
 
     private IEnumerator FadeToClearRoutine(float duration)

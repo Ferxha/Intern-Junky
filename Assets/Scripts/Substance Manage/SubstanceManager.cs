@@ -42,6 +42,7 @@ public class SubstanceManager : MonoBehaviour
     private bool isIntoxicated = false;
     private float timeWithoutEffect = 0f;
     private bool abstinenceFadeStarted = false;
+    private bool isActivatingSubstance = false;
 
     void Awake()
     {
@@ -76,6 +77,9 @@ public class SubstanceManager : MonoBehaviour
     void Update()
     {
         if (gameManager != null && !gameManager.IsGameActive)
+            return;
+
+        if (isActivatingSubstance)
             return;
 
         if (currentActiveSubstance != SubstanceType.None && !isIntoxicated)
@@ -139,18 +143,13 @@ public class SubstanceManager : MonoBehaviour
 
         if (currentActiveSubstance == SubstanceType.None)
         {
-            ActivateEffect(type);
+            StartActivationAfterConsumptionFade(type);
             DeductFromInventory(type);
         }
         else if (currentActiveSubstance == type)
         {
-            ProlongEffect();
+            ProlongEffectAfterConsumptionFade();
             DeductFromInventory(type);
-            
-            if (CheckIntoxicationRoll())
-            {
-                TriggerIntoxication();
-            }
         }
         else
         {
@@ -192,22 +191,36 @@ public class SubstanceManager : MonoBehaviour
         if (gameManager != null)
         {
             gameManager.UpdateSubstanceCounters();
-            PlayConsumptionFade();
+        }
+    }
+
+    private void StartActivationAfterConsumptionFade(SubstanceType type)
+    {
+        isActivatingSubstance = true;
+        timeWithoutEffect = 0f;
+        abstinenceFadeStarted = false;
+
+        if (gameManager != null && gameManager.fadeController != null)
+        {
+            gameManager.fadeController.StopFade();
+            gameManager.fadeController.FadeToBlackAndClear(
+                consumptionFadeToBlackDuration,
+                consumptionFadeToClearDuration,
+                () => ActivateEffect(type));
+        }
+        else
+        {
+            ActivateEffect(type);
         }
     }
 
     private void ActivateEffect(SubstanceType type)
     {
+        isActivatingSubstance = false;
         currentActiveSubstance = type;
         currentEffectTimer = effectDuration;
         timeWithoutEffect = 0f;
         abstinenceFadeStarted = false;
-        
-        if (gameManager != null && gameManager.fadeController != null)
-        {
-            gameManager.fadeController.StopFade();
-            gameManager.fadeController.FadeToClearInstant();
-        }
         
         ApplyVisualEffects(type);
         OnSubstanceConsumed?.Invoke(type);
@@ -215,18 +228,42 @@ public class SubstanceManager : MonoBehaviour
         Debug.Log($"Efecto de {type} activado por {effectDuration}s");
     }
 
-    private void PlayConsumptionFade()
+    private void ProlongEffectAfterConsumptionFade()
     {
-        if (gameManager == null || gameManager.fadeController == null)
-        {
-            return;
-        }
+        isActivatingSubstance = true;
+        timeWithoutEffect = 0f;
+        abstinenceFadeStarted = false;
 
-        gameManager.fadeController.FadeToBlackAndClear(consumptionFadeToBlackDuration, consumptionFadeToClearDuration);
+        if (gameManager != null && gameManager.fadeController != null)
+        {
+            gameManager.fadeController.StopFade();
+            gameManager.fadeController.FadeToBlackAndClear(
+                consumptionFadeToBlackDuration,
+                consumptionFadeToClearDuration,
+                () =>
+                {
+                    ProlongEffect();
+
+                    if (CheckIntoxicationRoll())
+                    {
+                        TriggerIntoxication();
+                    }
+                });
+        }
+        else
+        {
+            ProlongEffect();
+
+            if (CheckIntoxicationRoll())
+            {
+                TriggerIntoxication();
+            }
+        }
     }
 
     private void ProlongEffect()
     {
+        isActivatingSubstance = false;
         currentEffectTimer += effectDuration;
         Debug.Log($"Efecto de {currentActiveSubstance} prolongado. Tiempo restante: {currentEffectTimer}s");
     }
