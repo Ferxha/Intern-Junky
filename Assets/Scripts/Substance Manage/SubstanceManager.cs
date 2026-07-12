@@ -75,7 +75,7 @@ public class SubstanceManager : MonoBehaviour
             gameManager = FindFirstObjectByType<GameManager>();
         }
     }
-
+    
     void OnDestroy()
     {
         if (Instance == this)
@@ -122,7 +122,7 @@ public class SubstanceManager : MonoBehaviour
             }
         }
     }
-
+    // Consume una unidad de cocaína (o éxtasis) si la tiene disponible y no está intoxicado.
     public bool ConsumeCoca()
     {
         return ConsumeSubstance(SubstanceType.Coca);
@@ -141,6 +141,7 @@ public class SubstanceManager : MonoBehaviour
     public float GetCocaSpeedMultiplier() => cocaSpeedMultiplier;
     public float GetExtasisSpeedMultiplier() => extasisSpeedMultiplier;
 
+    // Configura los parámetros del juego según la dificultad seleccionada
     public void ConfigureForDifficulty(int difficulty)
     {
         ResetEffectState();
@@ -172,6 +173,7 @@ public class SubstanceManager : MonoBehaviour
         consumptionFadeToClearDuration = 0.75f;
     }
 
+    // Rellena el inventario de sustancias a sus valores iniciales y actualiza los contadores en la interfaz de usuario
     public void RefillInventory()
     {
         cocaInventory = initialCocaAmount;
@@ -185,6 +187,7 @@ public class SubstanceManager : MonoBehaviour
         RefreshSubstanceObjects();
     }
 
+    // Intenta consumir una sustancia específica, manejando la lógica de efectos, intoxicación y actualización del inventario
     private bool ConsumeSubstance(SubstanceType type)
     {
         if (GetInventoryAmount(type) <= 0)
@@ -219,6 +222,7 @@ public class SubstanceManager : MonoBehaviour
         return true;
     }
 
+    // Obtiene la cantidad actual de una sustancia específica en el inventario
     private int GetInventoryAmount(SubstanceType type)
     {
         return type switch
@@ -229,6 +233,7 @@ public class SubstanceManager : MonoBehaviour
         };
     }
 
+    // Resta una unidad de la sustancia consumida del inventario y actualiza los contadores en la interfaz de usuario
     private void DeductFromInventory(SubstanceType type)
     {
         if (type == SubstanceType.Coca)
@@ -248,6 +253,7 @@ public class SubstanceManager : MonoBehaviour
         RefreshSubstanceObjects();
     }
 
+    // Inicia el proceso de activación del efecto de la sustancia después de un fade a negro
     private void StartActivationAfterConsumptionFade(SubstanceType type)
     {
         isActivatingSubstance = true;
@@ -268,6 +274,7 @@ public class SubstanceManager : MonoBehaviour
         }
     }
 
+    // Activa el efecto de la sustancia consumida, aplicando los efectos visuales y notificando a otros sistemas del juego
     private void ActivateEffect(SubstanceType type)
     {
         isActivatingSubstance = false;
@@ -282,6 +289,7 @@ public class SubstanceManager : MonoBehaviour
         Debug.Log($"Efecto de {type} activado por {effectDuration}s");
     }
 
+    // Prolonga el efecto de la sustancia actual después de un fade a negro, reiniciando el temporizador
     private void ProlongEffectAfterConsumptionFade()
     {
         isActivatingSubstance = true;
@@ -328,6 +336,7 @@ public class SubstanceManager : MonoBehaviour
         return roll < intoxicationProbability;
     }
 
+    // Inicia el proceso de intoxicación, aplicando efectos visuales y notificando a otros sistemas del juego
     private void TriggerIntoxication()
     {
         if (isIntoxicated)
@@ -377,6 +386,7 @@ public class SubstanceManager : MonoBehaviour
         OnEffectEnded?.Invoke();
     }
 
+    // Inicia el proceso de fade a negro tras pasar el efecto de la sustancia y el jugador no consume (abstinencia)
     private void StartAbstinenceFade()
     {
         abstinenceFadeStarted = true;
