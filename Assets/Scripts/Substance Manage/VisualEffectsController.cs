@@ -66,6 +66,7 @@ public class VisualEffectsController : MonoBehaviour
             colorAdjustments.saturation.value = cocaSaturation;
     }
 
+    // Aplica el efecto de Éxtasis, ajustando saturación, shift de color y aberración cromática
     public void ApplyExtasisEffect()
     {
         if (!effectsInitialized) return;
@@ -83,6 +84,7 @@ public class VisualEffectsController : MonoBehaviour
             chromaticAberration.intensity.value = extasisChromaticAberration;
     }
 
+    // Aplica el efecto de intoxicación, ajustando saturación y aberración cromática
     public void ApplyIntoxicationEffect()
     {
         if (!effectsInitialized) return;
@@ -98,6 +100,7 @@ public class VisualEffectsController : MonoBehaviour
             
     }
 
+    // Resetea todos los efectos visuales a sus valores predeterminados
     public void ResetEffects()
     {
         if (!effectsInitialized) return;
@@ -117,6 +120,8 @@ public class VisualEffectsController : MonoBehaviour
         if (chromaticAberration != null)
             chromaticAberration.intensity.value = 0f;
     }
+
+    // Inicializa los efectos visuales obteniendo referencias a los componentes del Volume Profile
     private void InitializeEffects()
     {
         if (globalVolume == null || globalVolume.profile == null)

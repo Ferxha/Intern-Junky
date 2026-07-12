@@ -33,7 +33,7 @@ public class FadeController : MonoBehaviour
             Debug.Log($"✓ FadeController inicializado. CanvasGroup encontrado. Alpha inicial: {canvasGroup.alpha}");
         }
     }
-
+    // Inicia el proceso de fade a negro durante la duración
     public void FadeToBlack(float duration = -1f)
     {
         if (canvasGroup == null)
@@ -60,7 +60,7 @@ public class FadeController : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(FadeToClearRoutine(duration));
     }
-
+    
     public void FadeToBlackAndClear(float fadeToBlackTime = 1f, float fadeToClearTime = -1f, Action onComplete = null)
     {
         if (canvasGroup == null)
@@ -95,7 +95,7 @@ public class FadeController : MonoBehaviour
             canvasGroup.interactable = false;
         }
     }
-
+    // Rutina para hacer fade a negro
     private IEnumerator FadeToBlackRoutine(float duration)
     {
         if (canvasGroup == null) yield break;
@@ -115,14 +115,14 @@ public class FadeController : MonoBehaviour
         canvasGroup.alpha = 1;
         Debug.Log($"Fade to black completado. Alpha final: {canvasGroup.alpha}");
     }
-
+    // Rutina para hacer fade a transparente
     private IEnumerator FadeToBlackAndClearRoutine(float fadeToBlackTime, float fadeToClearTime, Action onComplete)
     {
         yield return FadeToBlackRoutine(fadeToBlackTime);
         yield return FadeToClearRoutine(fadeToClearTime);
         onComplete?.Invoke();
     }
-
+    // Rutina para hacer fade a transparente
     private IEnumerator FadeToClearRoutine(float duration)
     {
         if (canvasGroup == null) yield break;

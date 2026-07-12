@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
         UpdateOrderCounter();
         UpdateTimerText();
     }
-
+    // Asegúrate de que la instancia se borre cuando se destruya el GameManager.
     void OnDestroy()
     {
         if (Instance == this)
@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
             RestartGame();
         }
     }
-
+    // Método público para iniciar el juego con un nivel de dificultad determinado
     public void StartGame(int difficulty)
     {
         if (isGameActive)
@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
         SetGameplayCursor();
         PresentCurrentOrder();
     }
-
+    // Mostrar el HUD y actualizar los contadores de pedidos y de sustancias
     public void ShowHUD()
     {
         if (hudPanel != null)
@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour
         UpdateOrderCounter();
         UpdateSubstanceCounters();
     }
-
+    // Actualizar el contador de pedidos en la interfaz de usuario
     public void UpdateOrderCounter()
     {
         if (orderCountText != null)
@@ -158,7 +158,7 @@ public class GameManager : MonoBehaviour
             orderCountText.text = $" {currentOrderCount}/{targetOrderCount}";
         }
     }
-
+    // Actualizar los contadores de sustancias en la interfaz de usuario
     public void UpdateSubstanceCounters()
     {
         SubstanceManager substanceManager = SubstanceManager.Instance != null
@@ -180,12 +180,12 @@ public class GameManager : MonoBehaviour
             ExtasisCountText.text = $"{substanceManager.GetExtasisAmount()} Extasis";
         }
     }
-
+    // Método público para establecer el pedido actual y actualizar la interfaz de usuario
     public void SpawnOrder()
     {
         CompleteCurrentOrder();
     }
-
+    // Establece el nombre del pedido actual y actualiza la interfaz de usuario
     public void SetCurrentOrder(string orderName)
     {
         currentOrderName = orderName;
@@ -195,7 +195,7 @@ public class GameManager : MonoBehaviour
             orderText.text = currentOrderName;
         }
     }
-
+    // Completa el pedido actual, actualiza los contadores y maneja la finalización del juego si se alcanza el objetivo
     public bool CompleteCurrentOrder()
     {
         if (!isGameActive)
@@ -230,7 +230,7 @@ public class GameManager : MonoBehaviour
         SetMenuCursor();
         return false;
     }
-
+    // Presenta el pedido actual en la interfaz de usuario si el juego está activo y hay un pedido válido
     public void PresentCurrentOrder()
     {
         if (!isGameActive || string.IsNullOrWhiteSpace(currentOrderName))
@@ -241,7 +241,7 @@ public class GameManager : MonoBehaviour
         StopCoroutine(nameof(PresentOrderRoutine));
         StartCoroutine(PresentOrderRoutine());
     }
-
+    // Maneja el final del juego por intoxicación, mostrando la pantalla de fin de juego y aplicando un efecto de desvanecimiento
     public void GameOverIntoxication()
     {
         if (!isGameActive)
@@ -265,7 +265,7 @@ public class GameManager : MonoBehaviour
 
         HandleGameOver();
     }
-
+    // Maneja el final del juego por abstinencia, mostrando la pantalla de fin de juego
     public void GameOverAbstinence()
     {
         if (!isGameActive)
@@ -279,7 +279,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("GAME OVER: ABSTINENCIA. Te desmayaste.");
         HandleGameOver();
     }
-
+    // Maneja el final del juego por receta incorrecta, mostrando la pantalla de fin de juego y aplicando un efecto de desvanecimiento
     public void GameOverWrongRecipe()
     {
         if (!isGameActive)
@@ -303,13 +303,13 @@ public class GameManager : MonoBehaviour
         
         HandleGameOver();
     }
-
+    // Reinicia el juego cargando la escena actual y restableciendo la escala de tiempo
     public void RestartGame()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-
+    // Maneja la lógica de finalización del juego, mostrando la interfaz de usuario correspondiente y configurando el cursor
     private void HandleGameOver()
     {
         SetMenuCursor();
@@ -333,7 +333,7 @@ public class GameManager : MonoBehaviour
             Debug.Log("Click en Restart o presiona R para reiniciar");
         }
     }
-
+    // Muestra la interfaz de usuario de fin de juego y oculta el HUD
     private void ShowGameOverUI()
     {
         if (gameOverUI != null)
@@ -348,7 +348,7 @@ public class GameManager : MonoBehaviour
             gameOverUI.SetActive(true);
         }
     }
-
+    // Rutina para presentar el pedido actual en la interfaz de usuario, incluyendo efectos de desvanecimiento y temporización
     private IEnumerator PresentOrderRoutine()
     {
         isPresentingOrder = true;
@@ -378,7 +378,7 @@ public class GameManager : MonoBehaviour
         isPresentingOrder = false;
         SetGameplayCursor();
     }
-
+    // Busca referencias de UI faltantes y las asigna si es necesario
     private void FindMissingUIReferences()
     {
         if (ordersPanel == null)
@@ -420,7 +420,7 @@ public class GameManager : MonoBehaviour
             timerText = FindTextByName("Timer Text");
         }
     }
-
+    // Busca un objeto de texto por nombre y devuelve su componente TextMeshProUGUI si se encuentra
     private TextMeshProUGUI FindTextByName(string objectName)
     {
         GameObject textObject = FindGameObjectByName(objectName);
@@ -440,7 +440,7 @@ public class GameManager : MonoBehaviour
 
         return null;
     }
-
+    // Muestra el panel de pedidos y lo coloca al frente de la jerarquía de UI
     private void ShowOrdersPanel()
     {
         if (ordersPanel == null)
@@ -478,7 +478,7 @@ public class GameManager : MonoBehaviour
         warningPanel.transform.SetAsLastSibling();
         StartCoroutine(HideWarningRoutine());
     }
-
+    // Rutina para ocultar el panel de advertencia después de un tiempo determinado
     private IEnumerator HideWarningRoutine()
     {
         yield return new WaitForSeconds(warningDisplayDuration);
@@ -510,19 +510,19 @@ public class GameManager : MonoBehaviour
             inputModule.AssignDefaultActions();
         }
     }
-
+    // Configura el cursor para el modo de juego, bloqueándolo y haciéndolo invisible
     private void SetGameplayCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-
+    // Configura el cursor para el modo de menú, desbloqueándolo y haciéndolo visible
     private void SetMenuCursor()
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
+    // Configura la dificultad del juego, ajustando el número de pedidos objetivo y la frecuencia de reabastecimiento de sustancias
     private void ConfigureDifficulty(int difficulty)
     {
         targetOrderCount = orderCount + difficulty;
@@ -567,7 +567,7 @@ public class GameManager : MonoBehaviour
         int remainingSeconds = seconds % 60;
         timerText.text = $"{minutes:00}:{remainingSeconds:00}";
     }
-
+    // Reabastece las sustancias si se ha alcanzado el número de pedidos necesario para reabastecer
     private void RefillSubstancesIfNeeded()
     {
         if (currentOrderCount <= 0 || currentOrderCount % refillEveryOrders != 0)
@@ -584,7 +584,7 @@ public class GameManager : MonoBehaviour
             substanceManager.RefillInventory();
         }
     }
-
+    // Maneja el final del juego cuando se agota el tiempo, mostrando la pantalla de fin de juego
     private void GameOverTimeExpired()
     {
         if (!isGameActive)
